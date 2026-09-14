@@ -1,0 +1,13 @@
+.users-roles-modal-content {
+  overscroll-behavior: contain;
+}
+
+@media (max-width: 640px) {
+  .users-roles-modal {
+    max-height: calc(100vh - 24px) !important;
+  }
+
+  .users-roles-modal-content {
+    max-height: calc(100vh - 124px) !important;
+  }
+}
