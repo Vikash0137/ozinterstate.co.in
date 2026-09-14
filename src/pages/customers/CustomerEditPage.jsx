@@ -1,0 +1,20 @@
+import { useEffect, useState } from 'react'
+import { ArrowLeft, Loader2 } from 'lucide-react'
+import { useNavigate, useParams } from 'react-router-dom'
+import toast from 'react-hot-toast'
+import customerService from '../../services/customerService'
+import './Customers.css'
+
+const fields = [['name', 'Customer Name', true], ['email', 'Email Address', true, 'email'], ['phone', 'Phone Number', true], ['companyName', 'Company'], ['address', 'Address'], ['city', 'City'], ['state', 'State'], ['postalCode', 'Postcode'], ['country', 'Country']]
+
+export default function CustomerEditPage() {
+  const { id } = useParams(); const navigate = useNavigate(); const [loading, setLoading] = useState(true); const [saving, setSaving] = useState(false); const [form, setForm] = useState({})
+  useEffect(() => { let mounted = true; customerService.getCustomer(id).then((res) => { if (mounted && res?.data?.success) setForm({ customerType: 'Individual', country: 'Australia', status: 'active', ...res.data.data.customer }) }).catch((err) => { console.error('Failed to load customer', err); toast.error('Unable to load customer.') }).finally(() => mounted && setLoading(false)); return () => { mounted = false } }, [id])
+  const change = (event) => setForm((current) => ({ ...current, [event.target.name]: event.target.value }))
+  const submit = async (event) => { event.preventDefault(); setSaving(true); try { const res = await customerService.updateCustomer(id, form); if (!res?.data?.success) throw new Error(); toast.success('Customer updated successfully.'); navigate(`/customers/${id}`) } catch (err) { console.error('Failed to update customer', err); toast.error('Unable to update customer.') } finally { setSaving(false) } }
+  if (loading) return <div className="customer-page"><div className="customer-state"><Loader2 className="spinner" size={32} /><p>Loading customer...</p></div></div>
+  return <div className="customer-page"><div className="customer-detail-header"><div><button className="customer-secondary" onClick={() => navigate(`/customers/${id}`)}><ArrowLeft size={16} /> Back to Customer</button><h1 className="customer-title" style={{ marginTop: 18 }}>Edit Customer</h1><p className="customer-subtitle">Update customer information.</p></div></div><form className="customer-form-card" onSubmit={submit}><div className="customer-form-grid">{fields.map(([name, label, required, type]) => <Field key={name} label={label} name={name} type={type} value={form[name]} onChange={change} required={required} full={name === 'address'} />)}<SelectField label="Customer Type" name="customerType" value={form.customerType} onChange={change} options={['Individual', 'Business']} /><SelectField label="Status" name="status" value={form.status} onChange={change} options={['active', 'inactive']} /><Field label="Notes" name="notes" value={form.notes} onChange={change} full textarea /></div><div className="customer-form-actions"><button type="button" className="customer-secondary" onClick={() => navigate(`/customers/${id}`)}>Cancel</button><button type="submit" className="customer-primary" disabled={saving}>{saving ? <><Loader2 className="spinner" size={16} /> Updating...</> : 'Update Customer'}</button></div></form></div>
+}
+
+function Field({ label, name, value, onChange, required, type = 'text', full, textarea }) { return <div className={`customer-field ${full ? 'full' : ''}`}><label htmlFor={name}>{label} {required && <span>*</span>}</label>{textarea ? <textarea id={name} className="customer-textarea" name={name} value={value || ''} onChange={onChange} /> : <input id={name} className="customer-input" type={type} name={name} value={value || ''} onChange={onChange} required={required} />}</div> }
+function SelectField({ label, name, value, onChange, options }) { return <div className="customer-field"><label htmlFor={name}>{label}</label><select id={name} className="customer-select" name={name} value={value || ''} onChange={onChange}>{options.map((option) => <option key={option} value={option}>{option === 'active' || option === 'inactive' ? option[0].toUpperCase() + option.slice(1) : option}</option>)}</select></div> }
