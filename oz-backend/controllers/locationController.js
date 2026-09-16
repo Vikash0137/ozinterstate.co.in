@@ -422,7 +422,7 @@ export const getNearbyLocations = async (req, res) => {
  */
 export const getLocations = async (req, res) => {
   try {
-    const { page = 1, limit = 10, search = '', status = 'all', state = 'all', sort = 'createdAt', order = 'desc' } = req.query
+    const { page = 1, limit = 10, search = '', status = 'all', state = 'all', sort = 'name', order = 'asc' } = req.query
 
     const pageNum = parseIntOr(page, 1)
     const limitNum = parseIntOr(limit, 10)
