@@ -16,6 +16,7 @@ import Logo from './Logo'
 import MagneticButton from './ui/MagneticButton'
 import { NAV_LINKS, LOCATIONS } from '../data/siteData'
 import { fetchServices } from '../services/api'
+import locationService from '../services/locationService'
 import { useSiteSettings } from '../context/SiteContext'
 import { resolveCompanyDetails, resolveSocialUrl } from '../utils/siteSettings'
 
@@ -28,6 +29,7 @@ const FOOTER_SERVICES = [
 
 export default function Footer() {
   const [services, setServices] = useState(FOOTER_SERVICES)
+  const [locations, setLocations] = useState(LOCATIONS)
   const { siteSettings } = useSiteSettings()
   const company = resolveCompanyDetails(siteSettings)
   const socials = [
@@ -50,6 +52,15 @@ export default function Footer() {
         }
       })
       .catch((err) => console.error('Footer services load error:', err))
+
+    locationService.getPublicLocations({ limit: 100 })
+      .then((res) => {
+        const publicLocations = res?.data?.locations
+        if (Array.isArray(publicLocations) && publicLocations.length > 0) {
+          setLocations(publicLocations)
+        }
+      })
+      .catch((err) => console.error('Footer locations load error:', err))
   }, [])
 
   return (
@@ -141,11 +152,16 @@ export default function Footer() {
 
           {/* Locations */}
           <FooterCol title="Locations">
-            {LOCATIONS.map((l) => (
-              <FooterLink key={l.city} to={`/location/${l.city.toLowerCase().replace(/\s+/g, '-')}`}>
-                {l.city}, {l.state}
-              </FooterLink>
-            ))}
+            {locations.slice(0, 5).map((location) => {
+              const city = location.city || location.name
+              const slug = location.slug || city?.toLowerCase().replace(/\s+/g, '-')
+
+              return (
+                <FooterLink key={location._id || slug} to={`/location/${slug}`}>
+                  {city}, {location.state}
+                </FooterLink>
+              )
+            })}
             <FooterLink to="/locations">
               <span className="font-bold text-sky-400">All Locations →</span>
             </FooterLink>

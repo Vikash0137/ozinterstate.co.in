@@ -23,7 +23,30 @@ function renderServiceDescription(text) {
   const idealForIndex = lines.findIndex((line) => line.toUpperCase() === 'IDEAL FOR')
 
   if (idealForIndex < 1) {
-    return <p className="mt-4 whitespace-pre-line text-sm leading-relaxed text-slate-600 sm:text-base">{text}</p>
+    const listHeadingIndex = lines.findIndex((line) => /including:\s*$/i.test(line))
+    const listEndIndex = listHeadingIndex >= 0
+      ? lines.findIndex((line, index) => index > listHeadingIndex && /^everyday personal belongings$/i.test(line))
+      : -1
+    const resolvedListEndIndex = listEndIndex >= 0 ? listEndIndex + 1 : -1
+
+    if (listHeadingIndex >= 0 && resolvedListEndIndex > listHeadingIndex) {
+      return (
+        <div className="mt-4 text-sm leading-relaxed text-slate-600 sm:text-base">
+          {lines.slice(0, listHeadingIndex).map((line) => <p key={line} className="mt-4 first:mt-0">{line}</p>)}
+          <p className="mt-4">{lines[listHeadingIndex]}</p>
+          <ul className="mt-1 list-disc space-y-0.5 pl-8">
+            {lines.slice(listHeadingIndex + 1, resolvedListEndIndex).map((line) => <li key={line}>{line}</li>)}
+          </ul>
+          {lines.slice(resolvedListEndIndex).map((line) => <p key={line} className="mt-4">{line}</p>)}
+        </div>
+      )
+    }
+
+    return (
+      <div className="mt-4 text-sm leading-relaxed text-slate-600 sm:text-base">
+        {lines.map((line) => <p key={line} className="mt-4 first:mt-0">{line}</p>)}
+      </div>
+    )
   }
 
   const introLines = lines.slice(0, idealForIndex)
@@ -69,7 +92,9 @@ export default function ServiceOverview({ service }) {
     scope: {
       label: '1. Service Scope',
       icon: Compass,
-      heading: `Full-Service ${service?.title || 'Relocation'} Protocol`,
+      heading: service?.title === 'House Removalists'
+        ? 'House removalists who turn up and get it done'
+        : `Full-Service ${service?.title || 'Relocation'} Protocol`,
       text: description,
       highlights: [
         'Dedicated Move Coordinator for your route',
