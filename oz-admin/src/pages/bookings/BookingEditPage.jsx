@@ -1,0 +1,100 @@
+import { useEffect, useState } from 'react'
+import { useNavigate, useParams } from 'react-router-dom'
+import toast from 'react-hot-toast'
+import bookingService from '../../services/bookingService'
+
+const BookingEditPage = () => {
+  const navigate = useNavigate()
+  const { id } = useParams()
+  const [form, setForm] = useState(null)
+
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const res = await bookingService.getBooking(id)
+        const booking = res?.data?.data?.booking
+        if (booking) {
+          setForm({
+            customerId: booking.customerId?._id || booking.customerId || '',
+            customerName: booking.customerName || '',
+            customerEmail: booking.customerEmail || '',
+            customerPhone: booking.customerPhone || '',
+            serviceType: booking.serviceType || 'Interstate Moving',
+            pickupLocation: booking.pickupLocation || '',
+            deliveryLocation: booking.deliveryLocation || '',
+            pickupDate: booking.pickupDate ? new Date(booking.pickupDate).toISOString().slice(0, 10) : '',
+            deliveryDate: booking.deliveryDate ? new Date(booking.deliveryDate).toISOString().slice(0, 10) : '',
+            totalAmount: booking.totalAmount || 0,
+            currency: booking.currency || 'AUD',
+            status: booking.status || 'pending',
+            notes: booking.notes || '',
+          })
+        }
+      } catch (err) {
+        console.error('Failed to load booking', err)
+        toast.error('Unable to load booking.')
+      }
+    }
+
+    if (id) load()
+  }, [id])
+
+  const handleChange = (event) => {
+    const { name, value } = event.target
+    setForm((current) => ({ ...current, [name]: value }))
+  }
+
+  const handleSubmit = async (event) => {
+    event.preventDefault()
+    try {
+      await bookingService.updateBooking(id, {
+        ...form,
+        totalAmount: Number(form.totalAmount || 0),
+      })
+      toast.success('Booking updated successfully.')
+      navigate(`/bookings/${id}`)
+    } catch (err) {
+      console.error('Failed to update booking', err)
+      toast.error('Unable to save booking changes.')
+    }
+  }
+
+  if (!form) return <div style={{ padding: 24 }}>Loading booking...</div>
+
+  return (
+    <div style={{ padding: 24 }}>
+      <h2>Edit Booking</h2>
+      <form onSubmit={handleSubmit} style={{ maxWidth: 760, background: '#fff', borderRadius: 16, border: '1px solid #e2e8f0', padding: 24 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
+          <label>Customer Name<input name="customerName" value={form.customerName} onChange={handleChange} style={inputStyle} /></label>
+          <label>Email<input name="customerEmail" type="email" value={form.customerEmail} onChange={handleChange} style={inputStyle} /></label>
+          <label>Phone<input name="customerPhone" value={form.customerPhone} onChange={handleChange} style={inputStyle} /></label>
+          <label>Service Type<select name="serviceType" value={form.serviceType} onChange={handleChange} style={inputStyle}><option>Interstate Moving</option><option>Residential Moving</option><option>Commercial Moving</option><option>Packing</option><option>Storage</option></select></label>
+          <label>Pickup Location<input name="pickupLocation" value={form.pickupLocation} onChange={handleChange} style={inputStyle} /></label>
+          <label>Delivery Location<input name="deliveryLocation" value={form.deliveryLocation} onChange={handleChange} style={inputStyle} /></label>
+          <label>Pickup Date<input name="pickupDate" type="date" value={form.pickupDate} onChange={handleChange} style={inputStyle} /></label>
+          <label>Delivery Date<input name="deliveryDate" type="date" value={form.deliveryDate} onChange={handleChange} style={inputStyle} /></label>
+          <label>Total Amount<input name="totalAmount" type="number" value={form.totalAmount} onChange={handleChange} style={inputStyle} /></label>
+          <label>Status<select name="status" value={form.status} onChange={handleChange} style={inputStyle}><option value="pending">pending</option><option value="confirmed">confirmed</option><option value="in_transit">in_transit</option><option value="delivered">delivered</option><option value="completed">completed</option><option value="cancelled">cancelled</option></select></label>
+          <label>Currency<select name="currency" value={form.currency} onChange={handleChange} style={inputStyle}><option>AUD</option><option>USD</option></select></label>
+        </div>
+        <label style={{ display: 'block', marginTop: 16 }}>Notes<textarea name="notes" value={form.notes} onChange={handleChange} rows={5} style={{ ...inputStyle, minHeight: 120 }} /></label>
+        <div style={{ display: 'flex', gap: 12, marginTop: 20 }}>
+          <button type="submit" style={{ padding: '10px 16px', borderRadius: 10, background: '#0f172a', color: '#fff', border: 'none', cursor: 'pointer' }}>Update Booking</button>
+          <button type="button" onClick={() => navigate(`/bookings/${id}`)} style={{ padding: '10px 16px', borderRadius: 10, background: '#fff', border: '1px solid #dfe7f1', cursor: 'pointer' }}>Cancel</button>
+        </div>
+      </form>
+    </div>
+  )
+}
+
+const inputStyle = {
+  width: '100%',
+  padding: '10px 12px',
+  borderRadius: 10,
+  border: '1px solid #dfe7f1',
+  marginTop: 6,
+  boxSizing: 'border-box',
+}
+
+export default BookingEditPage

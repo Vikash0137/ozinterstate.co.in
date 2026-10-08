@@ -1,0 +1,44 @@
+:root {
+  /* OZ Interstate brand colors */
+  --color-primary: #073b78;
+  --color-primary-dark: #052b59;
+  --color-primary-light: #eaf2fa;
+
+  --color-secondary: #087c35;
+  --color-secondary-dark: #056329;
+  --color-secondary-light: #eaf6ef;
+
+  --color-white: #ffffff;
+  --color-black: #101828;
+
+  --color-background: #f4f7fb;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f8fafc;
+
+  --color-text-primary: #152b42;
+  --color-text-secondary: #66788a;
+  --color-text-muted: #8d9baa;
+
+  --color-border: #e1e8ef;
+  --color-border-dark: #d4dde6;
+
+  --color-success: #087c35;
+  --color-warning: #c47a05;
+  --color-danger: #d14343;
+  --color-info: #2864c7;
+
+  --sidebar-background: #052b59;
+  --sidebar-background-light: #073b78;
+  --sidebar-text: #dce8f4;
+  --sidebar-text-muted: #8fa6bc;
+
+  --shadow-small: 0 4px 14px rgba(5, 43, 89, 0.07);
+  --shadow-medium: 0 10px 30px rgba(5, 43, 89, 0.1);
+  --shadow-large: 0 20px 50px rgba(5, 43, 89, 0.16);
+
+  --radius-small: 8px;
+  --radius-medium: 12px;
+  --radius-large: 16px;
+
+  --transition-default: 0.2s ease;
+}
